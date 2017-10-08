@@ -1,3 +1,0 @@
-0000000000000000000000000000000000000000 21f7ffc6b5f96c91642110985e0f0d37f7f32da3 Piyush <Piyush@DESKTOP-UVJ1JTC.(none)> 1506777294 +0530	clone: from https://github.com/notrab/create-react-app-redux.git
-21f7ffc6b5f96c91642110985e0f0d37f7f32da3 21f7ffc6b5f96c91642110985e0f0d37f7f32da3 Piyush Vishwakarma <piyush2206@gmail.com> 1506926543 +0530	reset: moving to HEAD
-21f7ffc6b5f96c91642110985e0f0d37f7f32da3 d30e7ac93233d64017a7baa3bc05f0b5b23dc310 Piyush Vishwakarma <piyush2206@gmail.com> 1506929630 +0530	commit: added ts loader in webpack dev config after eject
