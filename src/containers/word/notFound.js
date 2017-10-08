@@ -4,12 +4,13 @@ import { connect } from 'react-redux'
 export class NotFound extends React.Component {
 
     render() {
+        console.log('in not found')
 
-        const { isLoading, displayWords } = this.props;
+        const { isLoading, displayIds } = this.props;
         if(isLoading){
             return (<br/>)
         }
-        if(displayWords.length > 0 ){
+        if(displayIds.length > 0 ){
             return (<br/>)
         }
         return (
@@ -22,7 +23,7 @@ export class NotFound extends React.Component {
 
 const mapStateToProps = state => ({
     isLoading: state.words.isLoading,
-    displayWords: state.words.displayWords
+    displayIds: state.words.displayIds
 })
 
 export default connect(

@@ -1,13 +1,15 @@
 import axios from "axios-es6";
-import _ from 'underscore';
-
+import { pageSize } from "../config.json"
+// import _ from 'underscore';
 export const LOAD_WORDS = 'words/LOAD_WORDS'
-
 const initialState = {
     count: 0,
     searchKey: '',
     arrWords: [],
-    displayWords: []
+    displayIds: [],
+    totalWords: 0,
+    totalPages: 0,
+    currentPage: 0
 }
 
 export default (state = initialState, action) => {
@@ -21,21 +23,28 @@ export default (state = initialState, action) => {
 
         case 'LOAD_WORDS_FULFILLED':
             // console.log('LOAD_WORDS_FULFILLED called')
-            const displayWords = [];
+            let totalIds = [];
             const arrWords = action.payload.data.words;
+            console.log('pageeeeeeeeeeeeeeeeeeeeeeee111', action)
 
-            for (let i = 0; i < 18; i++) {
+            for (let i = 0; i < arrWords.length; i++) {
                 const objWord = arrWords[i];
                 if (objWord.ratio < 0) {
                     continue;
                 }
-                displayWords.push(objWord);
+                totalIds.push(i);
             }
+            let page = 3
+            let start = page * pageSize;
+            let end = start + pageSize
+
             return {
                 ...state,
                 isLoading: false,
                 arrWords: arrWords,
-                displayWords: displayWords
+                displayIds: totalIds.slice(start, end),
+                totalWords: totalIds,
+                totalPages: Math.floor(totalIds.length / pageSize) + 1
             }
 
         case 'LOAD_WORDS_REJECTED':
@@ -46,38 +55,48 @@ export default (state = initialState, action) => {
 
         case 'SEARCH_WORDS':
             // console.log('SEARCH_WORDS called', state)
-            let foundWords = state.arrWords.filter(objWord => {
-                return (
+            let totalFoundIds = new Set();
+            for (let i = 0; i < state.arrWords.length; i++) {
+                const objWord = state.arrWords[i];
+                if (
                     action.payload.searchKey !== '' &&
                     objWord.ratio >= 0 &&
                     objWord.word.indexOf(action.payload.searchKey) !== -1
-                )
-            })
-            let foundMeanings = state.arrWords.filter(objWord => {
-                return (
+                ) {
+                    totalFoundIds.add(i);
+                }
+            }
+            for (let i = 0; i < state.arrWords.length; i++) {
+                const objWord = state.arrWords[i];
+                if (
                     action.payload.searchKey !== '' &&
                     objWord.ratio >= 0 &&
                     objWord.meaning.indexOf(action.payload.searchKey) !== -1
-                )
-            })
-            let uniqWords = _.uniq([...foundWords, ...foundMeanings], item => item.id)
-            uniqWords = uniqWords.slice(0, 18)
+                ) {
+                    totalFoundIds.add(i);
+                }
+            }
+            totalIds = [...totalFoundIds];
+
             return {
                 ...state,
                 isLoading: false,
                 searchKey: action.payload.searchKey,
-                displayWords: uniqWords
+                displayIds:  totalIds.slice(0, 18),
+                totalWords: totalIds.length,
+                totalPages: Math.floor(totalIds.length / pageSize) + 1
             }
         default:
             return state
     }
 }
 
-export const loadWords = () => {
+export const loadWords = (page) => {
     console.log('load Words called')
     return dispatch => {
         dispatch({
             type: 'LOAD_WORDS',
+            page: page,
             payload: axios.get('http://appsculture.com/vocab/words.json')
         })
     }

@@ -6,17 +6,25 @@ import Card from './card'
 import { loadWords } from '../../modules/words'
 
 export class Grid extends React.Component {
-    componentDidMount() {
-        this.props.loadWords();
+    componentWillMount() {
+        this.props.loadWords(1);
+        console.log('hereeeeeee')
     }
-    
+
     render() {
         
-        const { displayWords } = this.props;
-        
-        const Cards = displayWords.map(objWord => {
+
+        const { arrWords, displayIds } = this.props;
+        console.log('in grid render' , displayIds)
+
+        let Cards = [];
+        for (let i = 0; i < displayIds.length; i++) {
+            const index = displayIds[i];
+            Cards.push(<Card key={arrWords[index].id} objWord={arrWords[index]} />)
+        }
+        /* const Cards = displayIds.map(objWord => {
             return <Card key={objWord.id} objWord={objWord} />
-        })
+        }) */
 
         return (
             <div className="container-fluid">
@@ -29,7 +37,8 @@ export class Grid extends React.Component {
 }
 
 const mapStateToProps = state => ({
-    displayWords: state.words.displayWords
+    arrWords: state.words.arrWords,
+    displayIds: state.words.displayIds
 })
 
 const mapDispatchToProps = dispatch => bindActionCreators({
