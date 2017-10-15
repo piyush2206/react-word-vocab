@@ -4,7 +4,6 @@ import { connect } from 'react-redux'
 export class NotFound extends React.Component {
 
     render() {
-        console.log('in not found')
 
         const { isLoading, displayIds } = this.props;
         if(isLoading){

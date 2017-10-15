@@ -1,5 +1,5 @@
 import axios from "axios-es6";
-import { pageSize } from "../config.json"
+import { pageSize, vocabUrl } from "../config.json"
 // import _ from 'underscore';
 export const LOAD_WORDS = 'words/LOAD_WORDS'
 const initialState = {
@@ -9,7 +9,7 @@ const initialState = {
     displayIds: [],
     totalWords: 0,
     totalPages: 0,
-    currentPage: 0
+    currentPage: 1
 }
 
 export default (state = initialState, action) => {
@@ -25,7 +25,6 @@ export default (state = initialState, action) => {
             // console.log('LOAD_WORDS_FULFILLED called')
             let totalIds = [];
             const arrWords = action.payload.data.words;
-            console.log('pageeeeeeeeeeeeeeeeeeeeeeee111', action)
 
             for (let i = 0; i < arrWords.length; i++) {
                 const objWord = arrWords[i];
@@ -34,7 +33,7 @@ export default (state = initialState, action) => {
                 }
                 totalIds.push(i);
             }
-            let page = 3
+            let page = 0
             let start = page * pageSize;
             let end = start + pageSize
 
@@ -54,12 +53,21 @@ export default (state = initialState, action) => {
             }
 
         case 'SEARCH_WORDS':
-            // console.log('SEARCH_WORDS called', state)
+            if (action.payload.searchKey === ''){
+                page = 0
+                start = page * pageSize;
+                end = start + pageSize
+                return {
+                    ...state,
+                    displayIds: state.totalWords.slice(start, end),
+                    totalPages: Math.floor(state.totalWords.length / pageSize) + 1
+                }
+            }
+
             let totalFoundIds = new Set();
             for (let i = 0; i < state.arrWords.length; i++) {
                 const objWord = state.arrWords[i];
                 if (
-                    action.payload.searchKey !== '' &&
                     objWord.ratio >= 0 &&
                     objWord.word.indexOf(action.payload.searchKey) !== -1
                 ) {
@@ -69,7 +77,6 @@ export default (state = initialState, action) => {
             for (let i = 0; i < state.arrWords.length; i++) {
                 const objWord = state.arrWords[i];
                 if (
-                    action.payload.searchKey !== '' &&
                     objWord.ratio >= 0 &&
                     objWord.meaning.indexOf(action.payload.searchKey) !== -1
                 ) {
@@ -82,22 +89,34 @@ export default (state = initialState, action) => {
                 ...state,
                 isLoading: false,
                 searchKey: action.payload.searchKey,
-                displayIds:  totalIds.slice(0, 18),
-                totalWords: totalIds.length,
-                totalPages: Math.floor(totalIds.length / pageSize) + 1
+                displayIds: totalIds.slice(0, pageSize),
+                totalPages: Math.floor(totalIds.length / pageSize) + 1,
+                currentPage: 1
+            }
+        case 'CHANGE_PAGE':
+           
+
+            page = action.payload.pageNumber - 1
+            start = page * pageSize
+            end = start + pageSize
+
+            return {
+                ...state,
+                isLoading: false,
+                displayIds: state.totalWords.slice(start, end),
+                currentPage: action.payload.pageNumber
             }
         default:
             return state
     }
 }
 
-export const loadWords = (page) => {
-    console.log('load Words called')
+export const loadWords = () => {
+    // console.log('load Words called')
     return dispatch => {
         dispatch({
             type: 'LOAD_WORDS',
-            page: page,
-            payload: axios.get('http://appsculture.com/vocab/words.json')
+            payload: axios.get(vocabUrl)
         })
     }
 }
@@ -108,6 +127,16 @@ export const searchWords = (searchKey) => {
         dispatch({
             type: 'SEARCH_WORDS',
             payload: { searchKey }
+        })
+    }
+}
+
+export const changePage = (pageNumber) => {
+    pageNumber = parseInt(pageNumber, 10)
+    return dispatch => {
+        dispatch({
+            type: 'CHANGE_PAGE',
+            payload: { pageNumber }
         })
     }
 }
